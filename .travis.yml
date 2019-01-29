@@ -1,0 +1,25 @@
+language: bash
+
+services:
+  - docker
+
+env:
+  global:
+    - REPO=zabolotny/mariadb
+
+  matrix:
+    - VERSION=10.3 TAGS=10,latest
+    - VERSION=10.2
+    - VERSION=10.1
+    - VERSION=10.0
+    - VERSION=5.5 TAGS=5
+
+install:
+  - make
+  - make test
+
+after_success:
+  - . "${TRAVIS_BUILD_DIR}/release.sh"
+
+after_failure:
+  - make logs
