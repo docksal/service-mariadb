@@ -2,7 +2,7 @@
 
 VERSION ?= 10.3
 TAG ?= $(VERSION)
-REPO ?= zabolotny/mariadb
+REPO ?= docksal/mariadb
 
 NAME = docksal-mariadb-$(VERSION)
 
