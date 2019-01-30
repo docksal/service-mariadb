@@ -5,7 +5,7 @@ ARG VERSION
 ENV VERSION=${VERSION}
 
 # Docksal settings
-COPY mariadb-${VERSION}/default.cnf /etc/mysql/conf.d/10-default.cnf
+COPY ${VERSION}/default.cnf /etc/mysql/conf.d/10-default.cnf
 
 VOLUME /var/lib/mysql
 
