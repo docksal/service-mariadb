@@ -1,30 +1,24 @@
 # MariaDB Docker images for Docksal
 
-These MariaDB images are derived from the stock `mariadb` available at [Docker Hub](https://hub.docker.com/_/mariadb/).
- The files `default.cnf` and `docker-entrypoint.sh` contain several modifications.
+Docksal MariaDB images are derived from the stock `mariab` images from Docker Hub with a few adjustments (see Features).  
 
-## Available versions:
+We include and enable user defined overrides via a settings file. 
 
-- `mariadb-5.5`
-- `mariadb-10.0`
-- `mariadb-10.1`
-- `mariadb-10.2`
-- `mariadb-10.3`
+This image(s) is part of the [Docksal](http://docksal.io) image library.
 
-## How to:
+## Features
 
-If you're already using predefined Docksal stack, you can easily add MariaDB to it.
+- Better default settings (see `default.cnf`)
+- Ability to pass additional settings via a file mounted into the container
+  - User defined MySQL settings are expected in `/var/www/.docksal/etc/mysql/my.cnf` in the container.
+- Running a startup script as root
+  - Scripts should be placed in the `/docker-entrypoint.d/` folder
+- Docker heathcheck support
 
-Choose the version of the MariaDB (5.5, 10.0, 10.1, 10.2, 10.3) and add it 
-inside `docksal.env` file inside `.docksal` directory (under your project root directory). For example:
-```
-DB_IMAGE='ilakic/mariadb-docksal:mariadb-10.1'
-```
-Change just this one line of code. 
+## Versions
 
-This way, you'll still going to use stack that you're already been using and overwrite just `DB_IMAGE` part of the stack configuration.
-
-More about that [here](http://docksal.readthedocs.io/en/master/advanced/stack-config/).
-
-## **IMPORTANT!**
-**Be careful** if you already have project which uses MySQL database. The same goes if you are just switching from MySQL to MariaDB in your Docksal dev environment. Migrations from one database to another can be tricky, so **make sure you make a backup copy of your database** first.
+- `docksal/mariabdb:5.5`
+- `docksal/mariabdb:10.0`
+- `docksal/mariabdb:10.1`
+- `docksal/mariabdb:10.2`
+- `docksal/mariabdb:10.3`, `docksal/mariadb:latest`
