@@ -1,8 +1,7 @@
-ARG VERSION
-FROM mariadb:${VERSION}
+ARG FROM
+FROM ${FROM}
 
 ARG VERSION
-ENV VERSION=${VERSION}
 
 # Docksal settings
 COPY ${VERSION}/default.cnf /etc/mysql/conf.d/10-default.cnf
