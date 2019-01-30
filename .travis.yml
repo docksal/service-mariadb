@@ -1,25 +1,30 @@
-language: bash
+dist: xenial
 
-services:
-  - docker
+language: minimal
 
 env:
   global:
-    - REPO=zabolotny/mariadb
+    - REPO=docksal/mariadb
 
   matrix:
-    - VERSION=10.3 TAGS=10,latest
-    - VERSION=10.2
-    - VERSION=10.1
-    - VERSION=10.0
-    - VERSION=5.5 TAGS=5
+    - VERSION=5.5 FROM=mariadb:5.5 TAGS=5.5
+    - VERSION=10.0 FROM=mariadb:10.0 TAGS=10.0
+    - VERSION=10.1 FROM=mariadb:10.1 TAGS=10.1
+    - VERSION=10.2 FROM=mariadb:10.2 TAGS=10.2
+    - VERSION=10.3 FROM=mariadb:10.3 TAGS=10.3,latest
 
 install:
+  # Install Docksal to have a matching versions of Docker on the build host
+  - curl -fsSL https://get.docksal.io | bash
+  - fin version
+  - fin sysinfo
+
+script:
   - make
   - make test
 
 after_success:
-  - . "${TRAVIS_BUILD_DIR}/release.sh"
+  - ${TRAVIS_BUILD_DIR}/release.sh
 
 after_failure:
   - make logs

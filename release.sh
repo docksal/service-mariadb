@@ -2,18 +2,26 @@
 
 set -e
 
-if [[ "${TRAVIS_PULL_REQUEST}" == "false" && ("${TRAVIS_BRANCH}" == "master"  || -n "${TRAVIS_TAG}") ]]; then
-    docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+# No pushes for PRs
+if [[ "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
+	# Image tag scheme: <software-version>-<image-stability-tag>[-<flavor>]
+	if [[ "${TRAVIS_BRANCH}" == "develop" ]]; then
+		export STABILITY_TAG="edge"
+	elif [[ "${TRAVIS_BRANCH}" == "master" ]]; then
+		export STABILITY_TAG=""
+	elif [[ "${TRAVIS_TAG}" != "" ]]; then
+		export STABILITY_TAG="${TRAVIS_TAG:1:3}"
+	else
+		# No pushes for any other branches
+		exit 0
+	fi
 
-    if [[ -n "${TRAVIS_TAG}" ]]; then
-        export STABILITY_TAG="${TRAVIS_TAG}"
-    fi
+	docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
 
-    make release TAG="${VERSION}"
+	IFS=',' read -ra tags <<< "${TAGS}"
 
-    IFS=',' read -ra tags <<< "${TAGS}"
-
-    for tag in "${tags[@]}"; do
-        make release TAG="${tag}";
-    done
+	# Push all applicable tag variations
+	for tag in "${tags[@]}"; do
+		make release TAG="${tag}"
+	done
 fi
