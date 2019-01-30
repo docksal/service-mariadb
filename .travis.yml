@@ -7,10 +7,10 @@ env:
     - REPO=docksal/mariadb
 
   matrix:
-    - VERSION=5.5 FROM=mariabdb:5.5 TAGS=5.5
-    - VERSION=10.0 FROM=mariabdb:10.0 TAGS=10.0
-    - VERSION=10.1 FROM=mariabdb:10.1 TAGS=10.1
-    - VERSION=10.2 FROM=mariabdb:10.2 TAGS=10.2
+    - VERSION=5.5 FROM=mariadb:5.5 TAGS=5.5
+    - VERSION=10.0 FROM=mariadb:10.0 TAGS=10.0
+    - VERSION=10.1 FROM=mariadb:10.1 TAGS=10.1
+    - VERSION=10.2 FROM=mariadb:10.2 TAGS=10.2
     - VERSION=10.3 FROM=mariadb:10.3 TAGS=10.3,latest
 
 install:
