@@ -3,8 +3,8 @@
 FROM ?= mariadb:10.3
 VERSION ?= 10.3
 TAG ?= $(VERSION)
-REPO ?= docksal/mariadb
 
+REPO ?= docksal/mariadb
 NAME = docksal-mariadb-$(VERSION)
 
 MYSQL_ROOT_PASSWORD = root
@@ -15,9 +15,9 @@ MYSQL_DATABASE = default
 ENV = -e MYSQL_ROOT_PASSWORD=$(MYSQL_ROOT_PASSWORD) -e MYSQL_USER=$(MYSQL_USER) -e MYSQL_PASSWORD=$(MYSQL_PASSWORD) -e MYSQL_DATABASE=$(MYSQL_DATABASE) -e VERSION=$(VERSION)
 
 ifneq ($(STABILITY_TAG),)
-    ifneq ($(TAG),latest)
-        override TAG := $(TAG)-$(STABILITY_TAG)
-    endif
+	ifneq ($(TAG),latest)
+		override TAG := $(TAG)-$(STABILITY_TAG)
+	endif
 endif
 
 .PHONY: build test push shell run start stop logs clean release
@@ -26,15 +26,15 @@ build:
 	docker build -t $(REPO):$(TAG) --build-arg FROM=$(FROM) --build-arg VERSION=$(VERSION) .
 
 test:
-	IMAGE=$(REPO):$(TAG) NAME=$(NAME) VERSION=$(VERSION) bats ./tests/test.bats
+	IMAGE=$(REPO):$(TAG) NAME=$(NAME) VERSION=$(VERSION) ./tests/test.bats
 
 push:
 	docker push $(REPO):$(TAG)
 
-shell:
+shell: clean
 	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG) /bin/bash
 
-run:
+run: clean
 	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG)
 
 start: clean
