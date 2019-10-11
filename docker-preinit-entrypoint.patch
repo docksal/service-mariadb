@@ -1,6 +1,6 @@
 
-	# Process init scripts run by root
-	for f in /docker-entrypoint.d/*; do
+	# Process pre init scripts run by root
+	for f in /docker-entrypoint.d/*.sh; do
 		echo "Running init scripts in /docker-entrypoint.d/ as root..."
 		. "$f"
 	done
