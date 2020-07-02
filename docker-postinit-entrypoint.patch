@@ -1,0 +1,6 @@
+
+    for f in /var/www/.docksal/services/db/*; do
+	set -x
+	process_init_file "$f" "${mysql[@]}"
+    done
+

@@ -17,8 +17,8 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 
 ## Versions
 
-- `docksal/mariabdb:5.5`
-- `docksal/mariabdb:10.0`
-- `docksal/mariabdb:10.1`
-- `docksal/mariabdb:10.2`
-- `docksal/mariabdb:10.3`, `docksal/mariadb:latest`
+- `docksal/mariadb:5.5`
+- `docksal/mariadb:10.0`
+- `docksal/mariadb:10.1`
+- `docksal/mariadb:10.2`
+- `docksal/mariadb:10.3`, `docksal/mariadb:latest`
