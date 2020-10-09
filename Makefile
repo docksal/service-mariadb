@@ -1,7 +1,7 @@
 -include env_make
 
-FROM ?= mariadb:10.4
-VERSION ?= 10.4
+FROM ?= mariadb:10.5
+VERSION ?= 10.5
 BUILD_TAG ?= $(VERSION)
 SOFTWARE_VERSION ?= $(VERSION)
 
