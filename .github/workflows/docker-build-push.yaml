@@ -32,6 +32,8 @@ jobs:
         version:
           - 10.2
           - 10.3
+          - 10.4
+          - 10.5
     steps:
       -
         name: Install prerequisites for tests
