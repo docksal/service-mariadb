@@ -1,10 +1,12 @@
-ARG FROM
-FROM ${FROM}
+ARG UPSTREAM_IMAGE
+ARG VERSION
+FROM ${UPSTREAM_IMAGE}:${VERSION}
 
+# Has to be set again after FROM
 ARG VERSION
 
 # Docksal settings
-COPY ${VERSION}/default.cnf /etc/mysql/conf.d/10-default.cnf
+COPY ./${VERSION}/default.cnf /etc/mysql/conf.d/10-default.cnf
 
 VOLUME /var/lib/mysql
 

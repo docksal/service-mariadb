@@ -1,11 +1,10 @@
 -include env_make
 
-FROM ?= mariadb:10.5
+IMAGE ?= docksal/mariadb
+UPSTREAM_IMAGE ?= mariadb
 VERSION ?= 10.5
-BUILD_TAG ?= $(VERSION)
-SOFTWARE_VERSION ?= $(VERSION)
+BUILD_TAG ?= build-$(VERSION)
 
-REPO ?= docksal/mariadb
 NAME = docksal-mariadb-$(VERSION)
 
 MYSQL_ROOT_PASSWORD = root
@@ -20,22 +19,22 @@ ENV = -e MYSQL_ROOT_PASSWORD=$(MYSQL_ROOT_PASSWORD) -e MYSQL_USER=$(MYSQL_USER) 
 .PHONY: build test push shell run start stop logs clean release
 
 build:
-	docker build -t $(REPO):$(BUILD_TAG) --build-arg FROM=$(FROM) --build-arg VERSION=$(VERSION) .
+	docker build -t $(IMAGE):$(BUILD_TAG) --build-arg UPSTREAM_IMAGE=$(UPSTREAM_IMAGE) --build-arg VERSION=$(VERSION) .
 
 test:
-	IMAGE=$(REPO):$(BUILD_TAG) NAME=$(NAME) VERSION=$(VERSION) ./tests/test.bats
+	IMAGE=$(IMAGE) BUILD_TAG=$(BUILD_TAG) NAME=$(NAME) VERSION=$(VERSION) ./tests/test.bats
 
 push:
-	docker push $(REPO):$(BUILD_TAG)
+	docker push $(IMAGE):$(BUILD_TAG)
 
 shell: clean
-	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(BUILD_TAG) /bin/bash
+	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(IMAGE):$(BUILD_TAG) /bin/bash
 
 run: clean
-	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(BUILD_TAG)
+	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(IMAGE):$(BUILD_TAG)
 
 start: clean
-	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(BUILD_TAG)
+	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(IMAGE):$(BUILD_TAG)
 
 exec:
 	docker exec $(NAME) /bin/bash -c "$(CMD)"

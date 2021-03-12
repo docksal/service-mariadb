@@ -8,20 +8,20 @@ declare -a IMAGE_TAGS
 # Note: disabled
 #if [[ "${GITHUB_REF}" =~ "refs/heads/feature/" ]]; then
 #	GIT_SHA7=$(echo ${GITHUB_SHA} | cut -c1-7) # Short SHA (7 characters)
-#	IMAGE_TAGS+=("${REPO}:sha-${GIT_SHA7}-${VERSION}")
-#	IMAGE_TAGS+=("ghcr.io/${REPO}:sha-${GIT_SHA7}-${VERSION}")
+#	IMAGE_TAGS+=("${IMAGE}:sha-${GIT_SHA7}-${VERSION}")
+#	IMAGE_TAGS+=("ghcr.io/${IMAGE}:sha-${GIT_SHA7}-${VERSION}")
 #fi
 
 # develop => edge
 if [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
-	IMAGE_TAGS+=("${REPO}:edge-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${REPO}:edge-${VERSION}")
+	IMAGE_TAGS+=("${IMAGE}:edge-${VERSION}")
+	IMAGE_TAGS+=("ghcr.io/${IMAGE}:edge-${VERSION}")
 fi
 
 # master => stable
 if [[ "${GITHUB_REF}" == "refs/heads/master" ]]; then
-	IMAGE_TAGS+=("${REPO}:stable-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${REPO}:stable-${VERSION}")
+	IMAGE_TAGS+=("${IMAGE}:stable-${VERSION}")
+	IMAGE_TAGS+=("ghcr.io/${IMAGE}:stable-${VERSION}")
 fi
 
 # tags/v1.0.0 => 1.0
@@ -30,12 +30,12 @@ if [[ "${GITHUB_REF}" =~ "refs/tags/" ]]; then
 	IFS='.' read -a ver_arr <<< "${GITHUB_REF#refs/tags/}"
 	VERSION_MAJOR=${ver_arr[0]#v*}  # 2.7.0 => "2"
 	VERSION_MINOR=${ver_arr[1]}  # "2.7.0" => "7"
-	IMAGE_TAGS+=("${REPO}:stable-${VERSION}")
-	IMAGE_TAGS+=("${REPO}:${VERSION_MAJOR}-${VERSION}")
-	IMAGE_TAGS+=("${REPO}:${VERSION_MAJOR}.${VERSION_MINOR}-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${REPO}:stable-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${REPO}:${VERSION_MAJOR}-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${REPO}:${VERSION_MAJOR}.${VERSION_MINOR}-${VERSION}")
+	IMAGE_TAGS+=("${IMAGE}:stable-${VERSION}")
+	IMAGE_TAGS+=("${IMAGE}:${VERSION_MAJOR}-${VERSION}")
+	IMAGE_TAGS+=("${IMAGE}:${VERSION_MAJOR}.${VERSION_MINOR}-${VERSION}")
+	IMAGE_TAGS+=("ghcr.io/${IMAGE}:stable-${VERSION}")
+	IMAGE_TAGS+=("ghcr.io/${IMAGE}:${VERSION_MAJOR}-${VERSION}")
+	IMAGE_TAGS+=("ghcr.io/${IMAGE}:${VERSION_MAJOR}.${VERSION_MINOR}-${VERSION}")
 fi
 
 # Output a comma concatenated list of image tags
