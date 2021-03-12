@@ -1,0 +1,153 @@
+# Build a Docker image and push it to GitHub Container Registry
+# See https://github.com/docker/build-push-action/blob/master/.github/workflows/example.yml
+
+name: Docker Build and Push
+
+on:
+  schedule:
+    - cron: '0 10 * * 0' # everyday sunday at 10am
+  push:
+    branches:
+      - master
+      - develop
+      - feature/*
+    tags:
+      - 'v*.*.*'
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  DOCKER_IMAGE: docksal/mariadb
+  UPSTREAM_DOCKER_IMAGE: mariadb
+
+jobs:
+  build-push:
+    name: Build and Push
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false # Don't cancel other jobs if one fails
+      matrix:
+        version:
+          - 10.2
+          - 10.3
+    steps:
+      -
+        name: Install prerequisites for tests
+        run: |
+          set -xeuo pipefail
+          sudo apt-get -qq update
+          # Install cgi-fcgi binary used in tests
+          sudo apt-get -y --no-install-recommends install libfcgi-bin
+          # Install bats for tests
+          git clone https://github.com/bats-core/bats-core.git
+          cd bats-core
+          sudo ./install.sh /usr/local
+          bats -v
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Check Docker
+        run: |
+          docker version
+          docker info
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+      -
+        # Calculates docker image tags for the given build context
+        # The output is used in build and push step as `tags: ${{ steps.docker_meta.outputs.tags }}`
+        # See https://github.com/crazy-max/ghaction-docker-meta
+        name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          # List of Docker images to use as base name for tags
+          images: |
+            ${{ env.DOCKER_IMAGE }}
+            ghcr.io/${{ env.DOCKER_IMAGE }}
+          tag-sha: true # add git short SHA as Docker tag
+      -
+        # Generate image meta information
+        name: Docker image tags
+        id: docker_tags
+        env:
+          VERSION: ${{ matrix.version }}
+        run: make tags
+      -
+        # Build for local use + registry cache (ghcr.io)
+        name: Build and cache image (local)
+        id: docker_build_local
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          build-args: |
+            FROM=${{ env.UPSTREAM_DOCKER_IMAGE }}:${{ matrix.version }}
+            VERSION=${{ matrix.version }}
+          tags: ${{ env.DOCKER_IMAGE }}:build-${{ matrix.version }}
+          load: true # cache image locally for use by other steps
+          cache-from: type=registry,ref=ghcr.io/${{ env.DOCKER_IMAGE }}:build-${{ matrix.version }}
+          cache-to: type=inline # Write the cache metadata into the image configuration
+      -
+        # Print image info
+        name: Docker image info
+        run: |
+          set -xeuo pipefail
+          docker image ls | grep "${{ env.DOCKER_IMAGE }}"
+          docker image inspect "${{ env.DOCKER_IMAGE }}:build-${{ matrix.version }}"
+      -
+        # Cache image layers in the registry
+        # This will pick-up the build cache from the local build step
+        name: Build and push image cache (ghcr.io)
+        id: docker_build_cache
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          build-args: |
+            FROM=${{ env.UPSTREAM_DOCKER_IMAGE }}:${{ matrix.version }}
+            VERSION=${{ matrix.version }}
+          tags: ghcr.io/${{ env.DOCKER_IMAGE }}:build-${{ matrix.version }} # Build cache tag in ghcr.io
+          push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
+          cache-to: type=inline # Write the cache metadata into the image configuration
+      -
+        # Run tests
+        name: Test
+        env:
+          VERSION: ${{ matrix.version }}
+        run: make test
+      -
+        # Push final image to the registry
+        # This will pick-up the build cache from the local build step
+        name: Build and push image
+        id: docker_build_push
+        # Don't run if the list of tags is empty
+        # Note: using tags from docker_tags (custom)
+        if: ${{ steps.docker_tags.outputs.tags != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          build-args: |
+            FROM=${{ env.UPSTREAM_DOCKER_IMAGE }}:${{ matrix.version }}
+            VERSION=${{ matrix.version }}
+          tags: ${{ steps.docker_tags.outputs.tags }} # Note: using tags from docker_tags (custom script)
+          labels: ${{ steps.docker_meta.outputs.labels }} # Note: using lables from docker_meta
+          push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
+          cache-to: type=inline # Write the cache metadata into the image configuration
