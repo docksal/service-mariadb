@@ -14,6 +14,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 - Running a startup script as root
   - Scripts should be placed in the `/docker-entrypoint.d/` folder
 - Docker heathcheck support
+- Supported architectures: linux/amd64,linux/arm64
 
 ## Versions
 

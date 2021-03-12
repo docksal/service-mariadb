@@ -53,7 +53,7 @@ logs:
 clean:
 	docker rm -f $(NAME) >/dev/null 2>&1 || true
 
-release:
-	@scripts/docker-push.sh
+tags:
+	@.github/scripts/docker-tags.sh
 
 default: build
