@@ -49,6 +49,9 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       -
@@ -100,6 +103,7 @@ jobs:
           build-args: |
             FROM=${{ env.UPSTREAM_DOCKER_IMAGE }}:${{ matrix.version }}
             VERSION=${{ matrix.version }}
+          #platforms: linux/amd64,linux/arm64 # Note: cannot use multi-platform with local image caching ("load: true")
           tags: ${{ env.DOCKER_IMAGE }}:build-${{ matrix.version }}
           load: true # cache image locally for use by other steps
           cache-from: type=registry,ref=ghcr.io/${{ env.DOCKER_IMAGE }}:build-${{ matrix.version }}
@@ -123,6 +127,7 @@ jobs:
           build-args: |
             FROM=${{ env.UPSTREAM_DOCKER_IMAGE }}:${{ matrix.version }}
             VERSION=${{ matrix.version }}
+          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/${{ env.DOCKER_IMAGE }}:build-${{ matrix.version }} # Build cache tag in ghcr.io
           push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
           cache-to: type=inline # Write the cache metadata into the image configuration
@@ -147,6 +152,7 @@ jobs:
           build-args: |
             FROM=${{ env.UPSTREAM_DOCKER_IMAGE }}:${{ matrix.version }}
             VERSION=${{ matrix.version }}
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.docker_tags.outputs.tags }} # Note: using tags from docker_tags (custom script)
           labels: ${{ steps.docker_meta.outputs.labels }} # Note: using lables from docker_meta
           push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
