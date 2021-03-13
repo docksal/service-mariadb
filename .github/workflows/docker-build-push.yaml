@@ -97,6 +97,8 @@ jobs:
         name: Build and cache image (local)
         id: docker_build_local
         uses: docker/build-push-action@v2
+        env:
+          IMAGE_CACHE: ghcr.io/${{ env.IMAGE }}:build-${{ env.VERSION }}
         with:
           context: .
           file: ./Dockerfile
@@ -106,7 +108,7 @@ jobs:
           #platforms: linux/amd64,linux/arm64 # Note: cannot use multi-platform with local image caching ("load: true")
           tags: ${{ env.IMAGE }}:build-${{ env.VERSION }}
           load: true # cache image locally for use by other steps
-          cache-from: type=registry,ref=ghcr.io/${{ env.DOCKER_IMAGE }}:build-${{ matrix.version }}
+          cache-from: type=registry,ref=${{ env.IMAGE_CACHE }}
           cache-to: type=inline # Write the cache metadata into the image configuration
       -
         # Print image info
@@ -121,6 +123,8 @@ jobs:
         name: Build and push image cache (ghcr.io)
         id: docker_build_cache
         uses: docker/build-push-action@v2
+        env:
+          IMAGE_CACHE: ghcr.io/${{ env.IMAGE }}:build-${{ env.VERSION }}
         with:
           context: .
           file: ./Dockerfile
@@ -128,7 +132,7 @@ jobs:
             UPSTREAM_IMAGE=${{ env.UPSTREAM_IMAGE }}
             VERSION=${{ env.VERSION }}
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ env.IMAGE }}:build-${{ env.VERSION }} # Build cache tag in ghcr.io
+          tags: ${{ env.IMAGE_CACHE }} # Build cache tag in ghcr.io
           push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
           cache-to: type=inline # Write the cache metadata into the image configuration
       -
