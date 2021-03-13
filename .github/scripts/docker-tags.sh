@@ -2,43 +2,50 @@
 
 # Generates docker images tags for the docker/build-push-action@v2 action depending on the branch/tag.
 
-declare -a IMAGE_TAGS
+declare -a registryArr
+registryArr+=("docker.io") # Docker Hub
+registryArr+=("ghcr.io") # GitHub Container Registry
+
+declare -a imageTagArr
 
 # feature/* => sha-xxxxxxx
 # Note: disabled
 #if [[ "${GITHUB_REF}" =~ "refs/heads/feature/" ]]; then
 #	GIT_SHA7=$(echo ${GITHUB_SHA} | cut -c1-7) # Short SHA (7 characters)
-#	IMAGE_TAGS+=("${IMAGE}:sha-${GIT_SHA7}-${VERSION}")
-#	IMAGE_TAGS+=("ghcr.io/${IMAGE}:sha-${GIT_SHA7}-${VERSION}")
+#	imageTagArr+=("${IMAGE}:sha-${GIT_SHA7}-${VERSION}")
+#	imageTagArr+=("ghcr.io/${IMAGE}:sha-${GIT_SHA7}-${VERSION}")
 #fi
 
-# develop => edge
+# develop => version-edge
 if [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
-	IMAGE_TAGS+=("${IMAGE}:edge-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${IMAGE}:edge-${VERSION}")
+	imageTagArr+=("${IMAGE}:${VERSION}-edge")
 fi
 
-# master => stable
+# master => version
 if [[ "${GITHUB_REF}" == "refs/heads/master" ]]; then
-	IMAGE_TAGS+=("${IMAGE}:stable-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${IMAGE}:stable-${VERSION}")
+	imageTagArr+=("${IMAGE}:${VERSION}")
 fi
 
 # tags/v1.0.0 => 1.0
 if [[ "${GITHUB_REF}" =~ "refs/tags/" ]]; then
 	# Extract version parts from release tag
-	IFS='.' read -a ver_arr <<< "${GITHUB_REF#refs/tags/}"
-	VERSION_MAJOR=${ver_arr[0]#v*}  # 2.7.0 => "2"
-	VERSION_MINOR=${ver_arr[1]}  # "2.7.0" => "7"
-	IMAGE_TAGS+=("${IMAGE}:stable-${VERSION}")
-	IMAGE_TAGS+=("${IMAGE}:${VERSION_MAJOR}-${VERSION}")
-	IMAGE_TAGS+=("${IMAGE}:${VERSION_MAJOR}.${VERSION_MINOR}-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${IMAGE}:stable-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${IMAGE}:${VERSION_MAJOR}-${VERSION}")
-	IMAGE_TAGS+=("ghcr.io/${IMAGE}:${VERSION_MAJOR}.${VERSION_MINOR}-${VERSION}")
+	IFS='.' read -a release_arr <<< "${GITHUB_REF#refs/tags/}"
+	releaseMajor=${release_arr[0]#v*}  # 2.7.0 => "2"
+	releaseMinor=${release_arr[1]}  # "2.7.0" => "7"
+	imageTagArr+=("${IMAGE}:${VERSION}")
+	imageTagArr+=("${IMAGE}:${VERSION}-${releaseMajor}")
+	imageTagArr+=("${IMAGE}:${VERSION}-${releaseMajor}.${releaseMinor}")
 fi
 
-# Output a comma concatenated list of image tags
-IMAGE_TAGS_STR=$(IFS=,; echo "${IMAGE_TAGS[*]}")
-echo "${IMAGE_TAGS_STR}"
-echo "::set-output name=tags::${IMAGE_TAGS_STR}"
+# Build an array of registry/image:tag values
+declare -a repoImageTagArr
+for registry in ${registryArr[@]}; do
+	for imageTag in ${imageTagArr[@]}; do
+		repoImageTagArr+=("${registry}/${imageTag}")
+	done
+done
+
+# Print with new lines for output in build logs
+(IFS=$'\n'; echo "${repoImageTagArr[*]}")
+# Using newlines in outputs variables does not seem to work, so we'll use comas
+(IFS=$','; echo "::set-output name=tags::${repoImageTagArr[*]}")
