@@ -1,10 +1,12 @@
-ARG FROM
-FROM ${FROM}
+ARG UPSTREAM_IMAGE
+ARG VERSION
+FROM ${UPSTREAM_IMAGE}:${VERSION}
 
+# Has to be set again after FROM
 ARG VERSION
 
 # Docksal settings
-COPY ${VERSION}/default.cnf /etc/mysql/conf.d/10-default.cnf
+COPY ./${VERSION}/default.cnf /etc/mysql/conf.d/10-default.cnf
 
 VOLUME /var/lib/mysql
 
@@ -21,7 +23,9 @@ RUN set -xe; \
     rm -f /usr/local/bin/docker-preinit-entrypoint.patch /usr/local/bin/docker-postinit-entrypoint.patch
 
 EXPOSE 3306
-CMD ["mysqld"]
+
+# Starting with mariadb 10.5, character-set-server and collation-server can only be set via command line arguments.
+CMD ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
 
 # Health check script
 HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]
