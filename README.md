@@ -8,7 +8,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 
 ## Features
 
-- Better default settings (see `default.cnf`)
+- Better default settings (see `<version>/default.cnf`)
 - Ability to pass additional settings via a file mounted into the container
   - User defined MySQL settings are expected in `/var/www/.docksal/etc/mysql/my.cnf` in the container.
 - Running a startup script as root
