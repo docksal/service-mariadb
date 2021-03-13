@@ -93,20 +93,40 @@ jobs:
         id: docker_tags
         run: make tags
       -
-        # Build for local use + registry cache (ghcr.io)
-        name: Build and cache image (local)
-        id: docker_build_local
+        # Build for local use
+        name: Build image (amd64)
+        id: docker_build_amd64
         uses: docker/build-push-action@v2
+        env:
+          IMAGE_CACHE: ghcr.io/${{ env.IMAGE }}:build-${{ env.VERSION }}
         with:
           context: .
           file: ./Dockerfile
           build-args: |
             UPSTREAM_IMAGE=${{ env.UPSTREAM_IMAGE }}
             VERSION=${{ env.VERSION }}
-          #platforms: linux/amd64,linux/arm64 # Note: cannot use multi-platform with local image caching ("load: true")
+          platforms: linux/amd64 # Note: cannot use multi-platform with local image caching ("load: true")
           tags: ${{ env.IMAGE }}:build-${{ env.VERSION }}
           load: true # cache image locally for use by other steps
-          cache-from: type=registry,ref=ghcr.io/${{ env.DOCKER_IMAGE }}:build-${{ matrix.version }}
+          cache-from: type=registry,ref=${{ env.IMAGE_CACHE }}
+          cache-to: type=inline # Write the cache metadata into the image configuration
+      -
+        # Build for local use
+        name: Build image (arm64)
+        id: docker_build_arm64
+        uses: docker/build-push-action@v2
+        env:
+          IMAGE_CACHE: ghcr.io/${{ env.IMAGE }}:build-${{ env.VERSION }}
+        with:
+          context: .
+          file: ./Dockerfile
+          build-args: |
+            UPSTREAM_IMAGE=${{ env.UPSTREAM_IMAGE }}
+            VERSION=${{ env.VERSION }}
+          platforms: linux/arm64 # Note: cannot use multi-platform with local image caching ("load: true")
+          tags: ${{ env.IMAGE }}:build-${{ env.VERSION }}
+          load: true # cache image locally for use by other steps
+          cache-from: type=registry,ref=${{ env.IMAGE_CACHE }}
           cache-to: type=inline # Write the cache metadata into the image configuration
       -
         # Print image info
@@ -117,10 +137,11 @@ jobs:
           docker image inspect "${{ env.IMAGE }}:build-${{ env.VERSION }}"
       -
         # Cache image layers in the registry
-        # This will pick-up the build cache from the local build step
-        name: Build and push image cache (ghcr.io)
-        id: docker_build_cache
+        name: Push image cache (ghcr.io)
+        id: docker_push_cache
         uses: docker/build-push-action@v2
+        env:
+          IMAGE_CACHE: ghcr.io/${{ env.IMAGE }}:build-${{ env.VERSION }}
         with:
           context: .
           file: ./Dockerfile
@@ -128,7 +149,7 @@ jobs:
             UPSTREAM_IMAGE=${{ env.UPSTREAM_IMAGE }}
             VERSION=${{ env.VERSION }}
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ env.IMAGE }}:build-${{ env.VERSION }} # Build cache tag in ghcr.io
+          tags: ${{ env.IMAGE_CACHE }} # Build cache tag in ghcr.io
           push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
           cache-to: type=inline # Write the cache metadata into the image configuration
       -
@@ -138,8 +159,8 @@ jobs:
       -
         # Push final image to the registry
         # This will pick-up the build cache from the local build step
-        name: Build and push image
-        id: docker_build_push
+        name: Push image
+        id: docker_push_image
         # Don't run if the list of tags is empty
         # Note: using tags from docker_tags (custom)
         if: ${{ steps.docker_tags.outputs.tags != '' }}
