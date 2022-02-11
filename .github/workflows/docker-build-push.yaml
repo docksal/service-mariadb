@@ -29,6 +29,7 @@ jobs:
           - 10.3
           - 10.4
           - 10.5
+          - 10.6
     env:
       IMAGE: docksal/mariadb
       UPSTREAM_IMAGE: mariadb
