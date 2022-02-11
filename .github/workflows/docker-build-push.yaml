@@ -26,10 +26,10 @@ jobs:
       fail-fast: false # Don't cancel other jobs if one fails
       matrix:
         version:
-          - 10.2
           - 10.3
           - 10.4
           - 10.5
+          - 10.6
     env:
       IMAGE: docksal/mariadb
       UPSTREAM_IMAGE: mariadb

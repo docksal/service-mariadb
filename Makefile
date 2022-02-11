@@ -2,7 +2,7 @@
 
 IMAGE ?= docksal/mariadb
 UPSTREAM_IMAGE ?= mariadb
-VERSION ?= 10.5
+VERSION ?= 10.6
 BUILD_TAG ?= build-$(VERSION)
 
 NAME = docksal-mariadb-$(VERSION)
