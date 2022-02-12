@@ -16,5 +16,9 @@ innodb_log_file_size = 128MB
 
 innodb_file_per_table = 1
 
+# See https://github.com/docksal/service-db/pull/1
+#innodb_file_format = Barracuda
+#innodb_large_prefix = 1
+
 # Max packets
 max_allowed_packet = 128M
