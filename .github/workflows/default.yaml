@@ -17,7 +17,7 @@ defaults:
     shell: bash
 
 env:
-  IMAGE: docksal/mariabdb
+  IMAGE: docksal/mariadb
   #DOCKSAL_VERSION: develop
 
 jobs:
