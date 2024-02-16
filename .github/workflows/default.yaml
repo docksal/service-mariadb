@@ -31,12 +31,6 @@ jobs:
         include:
           -
             arch: amd64
-            version: "10.3"
-          -
-            arch: arm64
-            version: "10.3"
-          -
-            arch: amd64
             version: "10.4"
           -
             arch: arm64
@@ -129,15 +123,9 @@ jobs:
       fail-fast: false # Don't cancel other jobs if one fails
       matrix:
         include:
-          -
-            arch: amd64
-            version: "10.3"
           # Disabled arm64 tests.
           # TODO: Refactor tests to be compatible with a remote host test runner.
           # TODO: Remember to re-enabled the test results check in "push".
-#          -
-#            arch: arm64
-#            version: "10.3"
           -
             arch: amd64
             version: "10.4"
@@ -238,7 +226,6 @@ jobs:
     strategy:
       matrix:
         version:
-          - "10.3"
           - "10.4"
           - "10.5"
           - "10.6"
