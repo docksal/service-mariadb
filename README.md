@@ -20,4 +20,5 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 
 - `docksal/mariadb:10.4`
 - `docksal/mariadb:10.5`
-- `docksal/mariadb:10.6`, `docksal/mariadb:latest`
+- `docksal/mariadb:10.6` (LTS)
+- `docksal/mariadb:10.11` (LTS), `docksal/mariadb:latest`

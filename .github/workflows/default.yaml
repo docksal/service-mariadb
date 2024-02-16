@@ -47,6 +47,12 @@ jobs:
           -
             arch: arm64
             version: "10.6"
+          -
+            arch: amd64
+            version: "10.11"
+          -
+            arch: arm64
+            version: "10.11"
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -144,6 +150,12 @@ jobs:
 #          -
 #            arch: arm64
 #            version: "10.6"
+          -
+            arch: amd64
+            version: "10.11"
+#          -
+#            arch: arm64
+#            version: "10.11"
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -229,6 +241,7 @@ jobs:
           - "10.4"
           - "10.5"
           - "10.6"
+          - "10.11"
 
     env:
       VERSION_PREFIX: ""
