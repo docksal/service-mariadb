@@ -105,6 +105,14 @@ jobs:
           # Push intermediate arch-specific build tag to repo
           tags: ${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
           push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
+          # Disable automatic image attestations
+          # With image attestations enabled, the image tag pushed to the registry is a manifest list.
+          # That makes it impossible to stitch different platform images together in a manifest list, since you 
+          # cannot have a manifest list of manifest lists.
+          # See https://docs.docker.com/build/attestations/attestation-storage/
+          # TODO: Refactor to allow for image attestations
+          provenance: false
+          sbom: false
           # BUILD_IMAGE_TAG - persistent multi-arch tag, updated at the end of the build (success or failure)
           cache-from: type=registry,ref=${{ env.BUILD_IMAGE_TAG }}
           cache-to: type=inline # Write the cache metadata into the image configuration
