@@ -10,7 +10,6 @@ collation_database	utf8mb4_unicode_ci
 collation_server	utf8mb4_unicode_ci
 default_storage_engine	InnoDB
 innodb_buffer_pool_size	268435456
-innodb_file_per_table	ON
 innodb_flush_log_at_trx_commit	1
 innodb_log_buffer_size	8388608
 innodb_log_file_size	134217728
