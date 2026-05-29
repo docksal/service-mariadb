@@ -64,7 +64,7 @@ _healthcheck_wait ()
 
 	### Tests ###
 	# MySQL does a restart, so there should be two of these in the logs after a successful start
-	run bash -c 'make logs 2>&1 | grep "mysqld: ready for connections" | wc -l'
+	run bash -c 'make logs 2>&1 | grep -E "(mysqld|mariadbd): ready for connections" | wc -l'
 	[[ "$output" =~ "2" ]]
 	unset output
 }
