@@ -18,42 +18,58 @@ defaults:
 
 env:
   IMAGE: docksal/mariadb
-  LATEST_VERSION: "10.11"
+  LATEST_VERSION: "11.8"
   #DOCKSAL_VERSION: develop
 
 jobs:
   build:
     name: "Build: ${{ matrix.version }}/${{ matrix.arch }}"
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.runner }}
 
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
       matrix:
         include:
           -
-            arch: amd64
-            version: "10.4"
-          -
-            arch: arm64
-            version: "10.4"
-          -
-            arch: amd64
-            version: "10.5"
-          -
-            arch: arm64
-            version: "10.5"
-          -
+            platform: linux/amd64
             arch: amd64
             version: "10.6"
+            runner: ubuntu-24.04
           -
+            platform: linux/arm64
             arch: arm64
             version: "10.6"
+            runner: ubuntu-24.04-arm
           -
+            platform: linux/amd64
             arch: amd64
             version: "10.11"
+            runner: ubuntu-24.04
           -
+            platform: linux/arm64
             arch: arm64
             version: "10.11"
+            runner: ubuntu-24.04-arm
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: "11.4"
+            runner: ubuntu-24.04
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "11.4"
+            runner: ubuntu-24.04-arm
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: "11.8"
+            runner: ubuntu-24.04
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "11.8"
+            runner: ubuntu-24.04-arm
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -120,40 +136,53 @@ jobs:
 
   test:
     name: "Test: ${{ matrix.version }}/${{ matrix.arch }}"
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.runner }}
     needs: build
 
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
       matrix:
         include:
-          # Disabled arm64 tests.
-          # TODO: Refactor tests to be compatible with a remote host test runner.
-          # TODO: Remember to re-enabled the test results check in "push".
           -
-            arch: amd64
-            version: "10.4"
-#          -
-#            arch: arm64
-#            version: "10.4"
-          -
-            arch: amd64
-            version: "10.5"
-#          -
-#            arch: arm64
-#            version: "10.5"
-          -
+            platform: linux/amd64
             arch: amd64
             version: "10.6"
-#          -
-#            arch: arm64
-#            version: "10.6"
+            runner: ubuntu-24.04
           -
+            platform: linux/arm64
+            arch: arm64
+            version: "10.6"
+            runner: ubuntu-24.04-arm
+          -
+            platform: linux/amd64
             arch: amd64
             version: "10.11"
-#          -
-#            arch: arm64
-#            version: "10.11"
+            runner: ubuntu-24.04
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "10.11"
+            runner: ubuntu-24.04-arm
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: "11.4"
+            runner: ubuntu-24.04
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "11.4"
+            runner: ubuntu-24.04-arm
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: "11.8"
+            runner: ubuntu-24.04
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "11.8"
+            runner: ubuntu-24.04-arm
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -163,7 +192,7 @@ jobs:
     steps:
       -
         name: Setup Bats
-        uses: bats-core/bats-action@2.0.0
+        uses: bats-core/bats-action@3.0.1
       -
         name: Checkout
         uses: actions/checkout@v4
@@ -205,7 +234,7 @@ jobs:
 
   push:
     name: "Push: ${{ matrix.version }}/multi"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     # Wait for test to either succeed or fail
     needs: test
@@ -214,10 +243,10 @@ jobs:
     strategy:
       matrix:
         version:
-          - "10.4"
-          - "10.5"
           - "10.6"
           - "10.11"
+          - "11.4"
+          - "11.8"
 
     env:
       VERSION_PREFIX: ""
@@ -251,12 +280,10 @@ jobs:
         name: Docker image tags
         id: docker_tags
         # Don't push broken builds to persistent tags (both amd64 and arm64 tests must pass)
-        # TODO: re-enable the arm64 test results check once those tests are re-enabled
         run: |
           amd64_tests=$(cat test-results-${VERSION_PREFIX}${VERSION}-amd64.txt)
-          #arm64_tests=$(cat test-results-${VERSION_PREFIX}${VERSION}-arm64.txt)
-          # && [[ "${arm64_tests}" == "pass" ]]
-          if [[ "${amd64_tests}" == "pass" ]]; then
+          arm64_tests=$(cat test-results-${VERSION_PREFIX}${VERSION}-arm64.txt)
+          if [[ "${amd64_tests}" == "pass" ]] && [[ "${arm64_tests}" == "pass" ]]; then
             .github/scripts/docker-tags.sh
           fi
       -

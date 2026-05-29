@@ -54,7 +54,7 @@ exec:
 
 mysql-query:
 	# Usage: make mysql-query QUERY='SHOW DATABASES;'
-	$(DOCKER) exec $(NAME) bash -c "mysql --host=localhost --user=root --password=$(MYSQL_ROOT_PASSWORD) -e '$(QUERY)'"
+	$(DOCKER) exec $(NAME) bash -ec 'MYSQL_CLI=$$(command -v mysql || command -v mariadb); "$$MYSQL_CLI" --host=localhost --user=root --password=$(MYSQL_ROOT_PASSWORD) -e "$(QUERY)"'
 
 stop:
 	$(DOCKER) stop $(NAME)

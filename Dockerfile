@@ -1,4 +1,4 @@
-ARG UPSTREAM_IMAGE
+ARG UPSTREAM_IMAGE=mariadb:latest
 FROM ${UPSTREAM_IMAGE}
 
 # Has to be set again after FROM
@@ -24,7 +24,7 @@ RUN set -xe; \
 EXPOSE 3306
 
 # Starting with mariadb 10.5, character-set-server and collation-server can only be set via command line arguments.
-CMD ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+CMD ["mariadbd", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
 
 # Health check script
 HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]
